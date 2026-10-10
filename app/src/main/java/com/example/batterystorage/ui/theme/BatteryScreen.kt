@@ -1,3 +1,4 @@
+
 package com.example.batterystorage.ui.theme
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -16,35 +17,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.batterystorage.data.BatteryCalculator
+import com.example.batterystorage.viewmodel.BatteryViewModel
 
 @Composable
-fun BatteryScreen() {
+fun BatteryScreen(
+    batteryViewModel: BatteryViewModel = viewModel()
+) {
+    val uiState by batteryViewModel.uiState.collectAsStateWithLifecycle()
+    val batteryLevel = uiState.batteryLevel
 
-    var batteryLevel by remember {
-        mutableStateOf(65)
-    }
-
-    var isCharging by remember {
-        mutableStateOf(false)
-    }
-
-    var isDischarging by remember {
-        mutableStateOf(false)
-    }
-
-    val calculator = remember {
-        BatteryCalculator()
-    }
+    val calculator = BatteryCalculator()
 
     val animatedLevel by animateFloatAsState(
         targetValue = batteryLevel / 100f,
@@ -57,7 +48,6 @@ fun BatteryScreen() {
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Advanced режим",
             style = MaterialTheme.typography.titleLarge
@@ -68,11 +58,9 @@ fun BatteryScreen() {
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-
             Column(
                 modifier = Modifier.padding(20.dp)
             ) {
-
                 Text(
                     text = "Рівень заряду",
                     fontSize = 20.sp
@@ -94,7 +82,6 @@ fun BatteryScreen() {
                         .clip(RoundedCornerShape(10.dp))
                         .background(Color.LightGray)
                 ) {
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(animatedLevel)
@@ -123,7 +110,6 @@ fun BatteryScreen() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-
             Card(
                 modifier = Modifier.weight(1f)
             ) {
@@ -131,7 +117,7 @@ fun BatteryScreen() {
                     modifier = Modifier.padding(12.dp)
                 ) {
                     Text("Ємність")
-                    Text("100 кВт·год")
+                    Text("${uiState.capacity} кВт·год")
                 }
             }
 
@@ -142,7 +128,7 @@ fun BatteryScreen() {
                     modifier = Modifier.padding(12.dp)
                 ) {
                     Text("Потужність")
-                    Text("25 кВт")
+                    Text("${uiState.power} кВт")
                 }
             }
         }
@@ -150,10 +136,7 @@ fun BatteryScreen() {
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = calculator.getBatteryStatus(
-                isCharging = isCharging,
-                isDischarging = isDischarging
-            ),
+            text = "Стан: ${uiState.status.lowercase()}",
             fontSize = 18.sp
         )
 
@@ -162,14 +145,9 @@ fun BatteryScreen() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-
             Button(
                 onClick = {
-                    batteryLevel =
-                        calculator.chargeBattery(batteryLevel)
-
-                    isCharging = true
-                    isDischarging = false
+                    batteryViewModel.chargeBattery()
                 }
             ) {
                 Text("Зарядити")
@@ -177,11 +155,7 @@ fun BatteryScreen() {
 
             Button(
                 onClick = {
-                    batteryLevel =
-                        calculator.dischargeBattery(batteryLevel)
-
-                    isCharging = false
-                    isDischarging = true
+                    batteryViewModel.dischargeBattery()
                 }
             ) {
                 Text("Розрядити")
@@ -192,9 +166,7 @@ fun BatteryScreen() {
 
         Button(
             onClick = {
-                batteryLevel = calculator.resetBattery()
-                isCharging = false
-                isDischarging = false
+                batteryViewModel.resetBattery()
             }
         ) {
             Text("Скинути")

@@ -1,3 +1,4 @@
+
 package com.example.batterystorage.ui.theme
 
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.batterystorage.viewmodel.BatteryViewModel
 
 @Composable
 fun BatteryStorageScreen(
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    batteryViewModel: BatteryViewModel = viewModel()
 ) {
-
     var selectedMode by remember {
         mutableStateOf("Advanced")
     }
@@ -32,7 +35,6 @@ fun BatteryStorageScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Система накопичення енергії"
         )
@@ -43,7 +45,6 @@ fun BatteryStorageScreen(
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
             Button(
                 onClick = {
                     selectedMode = "Basic"
@@ -73,7 +74,6 @@ fun BatteryStorageScreen(
         }
 
         when (selectedMode) {
-
             "Basic" -> {
                 BasicBatteryApp()
             }
@@ -83,7 +83,9 @@ fun BatteryStorageScreen(
             }
 
             "Advanced" -> {
-                BatteryScreen()
+                BatteryScreen(
+                    batteryViewModel = batteryViewModel
+                )
             }
         }
 
